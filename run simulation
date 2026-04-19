@@ -11,3 +11,41 @@ def lif_neuron(I=3.0, V_th=-50.0, tau_m=20.0, R=10.0):
     V_reset = -65.0
     dt = 1.0
     T = 200  # ms
+    time = np.arange(0, T + dt, dt)
+    V = np.zeros(len(time))
+    V[0] = V_rest
+    spikes = []
+
+    for t in range(1, len(time)):
+        dV = (-(V[t-1] - V_rest) + R * I) / tau_m
+        V[t] = V[t-1] + dV * dt
+
+        if V[t] >= V_th:
+            V[t] = 30.0  # spike peak
+            spikes.append(time[t])
+            if t+1 < len(time):
+                V[t+1] = V_reset
+
+    # Plot
+    plt.figure(figsize=(10, 5))
+    plt.plot(time, V, label="Membrane Potential (mV)")
+    plt.axhline(V_th, color='r', linestyle='--', label="Threshold")
+    plt.xlabel("Time (ms)")
+    plt.ylabel("Membrane Potential (mV)")
+    plt.title("Interactive LIF Neuron Simulation")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    print(f"Spike times (ms): {spikes}")
+
+# -----------------------------
+# Interactive Sliders
+# -----------------------------
+interact(
+    lif_neuron,
+    I=FloatSlider(value=3.0, min=0.0, max=10.0, step=0.1, description="Input Current (nA)"),
+    V_th=FloatSlider(value=-50.0, min=-70.0, max=-40.0, step=1.0, description="Threshold (mV)"),
+    tau_m=FloatSlider(value=20.0, min=5.0, max=50.0, step=1.0, description="Tau_m (ms)"),
+    R=FloatSlider(value=10.0, min=1.0, max=20.0, step=0.5, description="Resistance (MΩ)")
+)
